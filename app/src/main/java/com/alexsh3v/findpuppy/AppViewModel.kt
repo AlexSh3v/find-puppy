@@ -69,7 +69,7 @@ class AppViewModel(
         } while (!emptyCell.isEmpty())
 
         // FIXME: MAKE SURE THIS IS NOT CORRUPTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        selectedCell.value.bindPosition(randomX, randomY)
+        selectedCell.value.bindPosition(randomY, randomX)
         listOfCells.value[randomY][randomX].changeState(Cell.State.Shown)
     }
 
