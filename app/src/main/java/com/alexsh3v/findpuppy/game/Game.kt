@@ -3,16 +3,21 @@ package com.alexsh3v.findpuppy.game
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.alexsh3v.findpuppy.AppViewModel
 import com.alexsh3v.findpuppy.AppViewModel.Companion.FIELD_SIZE
 import com.alexsh3v.findpuppy.R
@@ -137,7 +142,23 @@ fun Game(gameViewModel: AppViewModel) {
                     y = relativeY
                 )
 
-            if (!isPuppyFound && distance == 1)
+            var colorFilter: ColorFilter? = null
+
+            // If distance to cell is zero
+            // that means that it is the selected cell.
+            // So we make yellow border to it
+            if (distance == 0) {
+                modifier = modifier.border(3.dp, Color.Yellow)
+            }
+
+            // For cell that are to the left, right, above and bottom
+            if (!isPuppyFound && distance == 1) {
+
+                colorFilter = ColorFilter.tint(
+                    Color(0x43000000),
+                    blendMode = BlendMode.Darken
+                )
+
                 modifier = modifier.clickable {
                     if (i == 0 && 0 == j)
                         tileSize = tileSize.plus(5.dp)
@@ -158,12 +179,14 @@ fun Game(gameViewModel: AppViewModel) {
                         }
                     }
                 }
+            }
 
             Image(
                 painter = painterResource(id = resourceState.value),
                 contentDescription = "image at $i $j",
                 contentScale = ContentScale.Fit,
-                modifier = modifier
+                modifier = modifier,
+                colorFilter = colorFilter
             )
 
         }
