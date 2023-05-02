@@ -8,8 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.alexsh3v.findpuppy.game.App
 import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,10 +22,10 @@ class MainActivity : ComponentActivity() {
                 val viewModel = viewModel<AppViewModel>()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = Color(0xFF0A4C09)
                 ) {
-                    App(gameViewModel = viewModel)
                 }
+                App(gameViewModel = viewModel)
             }
         }
     }
