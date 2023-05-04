@@ -3,7 +3,7 @@ package com.alexsh3v.findpuppy.game
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class Cell(type: Type = Type.Neutral) : java.io.Serializable {
+class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     private var _i: MutableStateFlow<Int>
     val i: Flow<Int>
         get() = _i

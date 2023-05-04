@@ -1,7 +1,6 @@
 package com.alexsh3v.findpuppy
 
-import androidx.lifecycle.SavedStateHandle
-import com.alexsh3v.findpuppy.game.Cell
+import com.alexsh3v.findpuppy.game.Tile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
@@ -18,8 +17,8 @@ class FindPuppyGame {
     // TODO: CHANGE TO "MENU"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //       ------------------------------------vvvv
     var screenType = MutableStateFlow(ScreenType.Game)
-    var listOfCells = MutableStateFlow(ArrayList<ArrayList<Cell>>())
-    var selectedCell = MutableStateFlow(Cell())
+    var listOfTiles = MutableStateFlow(ArrayList<ArrayList<Tile>>())
+    var selectedTile = MutableStateFlow(Tile())
 
     fun generateNewField() {
         /*
@@ -34,46 +33,46 @@ class FindPuppyGame {
          */
 
         // Create field FIELD_SIZE x FIELD_SIZE
-        // Fill with random content in cell
-        if (listOfCells.value.size == 0)
+        // Fill with random content in tile
+        if (listOfTiles.value.size == 0)
             for (i in 0 until FIELD_SIZE) {
-                val newList = ArrayList<Cell>()
-                listOfCells.value.add(newList)
+                val newList = ArrayList<Tile>()
+                listOfTiles.value.add(newList)
                 for (j in 0 until FIELD_SIZE) {
-                    newList.add(Cell(Cell.Type.Neutral))
+                    newList.add(Tile(Tile.Type.Neutral))
                 }
             }
         else
             for (i in 0 until FIELD_SIZE) {
-                for (cell in listOfCells.value[i]) {
-                    cell.changeType(Cell.Type.Neutral)
-                    cell.changeState(Cell.State.Hidden)
+                for (tile in listOfTiles.value[i]) {
+                    tile.changeType(Tile.Type.Neutral)
+                    tile.changeState(Tile.State.Hidden)
                 }
             }
 
         // Place Puppy
         var randomX = Random.nextInt(0, FIELD_SIZE - 1)
         var randomY = Random.nextInt(0, FIELD_SIZE - 1)
-        listOfCells.value[randomY][randomX].changeType(Cell.Type.WithPuppy)
+        listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
 
-        var emptyCell: Cell
+        var emptyTile: Tile
         do {
             randomX = Random.nextInt(0, FIELD_SIZE - 1)
             randomY = Random.nextInt(0, FIELD_SIZE - 1)
-            emptyCell = listOfCells.value[randomY][randomX]
-        } while (!emptyCell.isEmpty())
+            emptyTile = listOfTiles.value[randomY][randomX]
+        } while (!emptyTile.isEmpty())
 
         // FIXME: MAKE SURE THIS IS NOT CORRUPTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        selectedCell.value.bindPosition(randomY, randomX)
-        listOfCells.value[randomY][randomX].changeState(Cell.State.Shown)
+        selectedTile.value.bindPosition(randomY, randomX)
+        listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
     }
 
-    fun getCellAt(i: Int, j: Int): Cell {
+    fun getTileAt(i: Int, j: Int): Tile {
 
         if (i !in 0 until FIELD_SIZE || j !in 0 until FIELD_SIZE)
             throw IndexOutOfBoundsException("got unexpected position: ($i, $j)")
 
-        return listOfCells.value[i][j]
+        return listOfTiles.value[i][j]
     }
 
 }
