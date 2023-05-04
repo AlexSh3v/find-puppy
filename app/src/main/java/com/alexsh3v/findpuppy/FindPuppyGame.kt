@@ -1,13 +1,11 @@
 package com.alexsh3v.findpuppy
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import com.alexsh3v.findpuppy.game.Cell
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
-class AppViewModel(
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
+class FindPuppyGame {
 
     enum class ScreenType {
         Menu, Game
@@ -18,13 +16,10 @@ class AppViewModel(
     }
 
     // TODO: CHANGE TO "MENU"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //       -------------------------------------------------------------------vvvv
-    var screenType = savedStateHandle.getStateFlow<ScreenType>("screenType", ScreenType.Game)
-    var listOfCells =
-        savedStateHandle.getStateFlow<ArrayList<ArrayList<Cell>>>("listOfCells", ArrayList())
-
-    var selectedCell = savedStateHandle.getStateFlow("selectedCell", Cell())
-
+    //       ------------------------------------vvvv
+    var screenType = MutableStateFlow(ScreenType.Game)
+    var listOfCells = MutableStateFlow(ArrayList<ArrayList<Cell>>())
+    var selectedCell = MutableStateFlow(Cell())
 
     fun generateNewField() {
         /*

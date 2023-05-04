@@ -1,6 +1,5 @@
 package com.alexsh3v.findpuppy.game
 
-import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -35,8 +34,6 @@ class Cell(type: Type = Type.Neutral) : java.io.Serializable {
         this._j = MutableStateFlow(0)
         this._state = MutableStateFlow(State.Hidden)
     }
-
-
 
 
     enum class Type {

@@ -1,6 +1,5 @@
 package com.alexsh3v.findpuppy.game
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -17,44 +16,40 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import com.alexsh3v.findpuppy.AppViewModel
-import com.alexsh3v.findpuppy.AppViewModel.Companion.FIELD_SIZE
+import com.alexsh3v.findpuppy.FindPuppyGame
+import com.alexsh3v.findpuppy.FindPuppyGame.Companion.FIELD_SIZE
 import com.alexsh3v.findpuppy.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.Double
+import kotlinx.coroutines.selects.select
 import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 @Composable
-fun App(gameViewModel: AppViewModel) {
-    val screenType by gameViewModel.screenType.collectAsState()
+fun App(game: FindPuppyGame) {
+    val screenType by game.screenType.collectAsState()
 
     when (screenType) {
-        AppViewModel.ScreenType.Menu -> Menu(gameViewModel)
-        AppViewModel.ScreenType.Game -> Game(gameViewModel)
+        FindPuppyGame.ScreenType.Menu -> Menu(game)
+        FindPuppyGame.ScreenType.Game -> Game(game)
     }
 
 }
 
 
 @Composable
-fun Menu(gameViewModel: AppViewModel) {
+fun Menu(gameViewModel: FindPuppyGame) {
 }
 
-@SuppressLint("ResourceType", "RememberReturnType")
 @Composable
-fun Game(gameViewModel: AppViewModel) {
-    // FIXME: put into remember IF during the game there will be some recompositions
+fun Game(game: FindPuppyGame) {
+
     remember {
-        gameViewModel.generateNewField()
+        game.generateNewField()
+        null
     }
 
-    val listOfCells = gameViewModel.listOfCells.collectAsState().value
     var tileSize by remember {
-        mutableStateOf(150.dp)
+        mutableStateOf(100.dp)
     }
 
     val configuration = LocalConfiguration.current
@@ -109,15 +104,14 @@ fun Game(gameViewModel: AppViewModel) {
     }
     val centerX = screenWidth.div(2).minus(tileSize.div(2))
     val centerY = screenHeight.div(2).minus(tileSize.div(2))
-    val selectedCell = gameViewModel.selectedCell.collectAsState().value
+    val selectedCell = game.selectedCell.collectAsState().value
     val selectedI = selectedCell.i.collectAsState(initial = 0).value
     val selectedJ = selectedCell.j.collectAsState(initial = 0).value
 
     for (i in 0 until FIELD_SIZE) {
         for (j in 0 until FIELD_SIZE) {
 
-            val cellObject = gameViewModel.getCellAt(i, j)
-            // Todo: prob useless
+            val cellObject = game.getCellAt(i, j)
             cellObject.bindPosition(i, j)
 
             val resourceState = remember {
@@ -128,18 +122,22 @@ fun Game(gameViewModel: AppViewModel) {
 
             val type = cellObject.type.collectAsState(initial = Cell.Type.WithPuppy).value
 
-            val relativeInArrayI = i - selectedI
-            val relativeInArrayJ = j - selectedJ
-            val distance = abs(relativeInArrayI) + abs(relativeInArrayJ)
+            val relativeVector = Pair(
+                i - selectedI, // x
+                j - selectedJ // y
+            )
+            val distance = abs(relativeVector.first) + abs(relativeVector.second)
 
-            val relativeX = tileSize.times(relativeInArrayI).plus(centerX)
-            val relativeY = tileSize.times(relativeInArrayJ).plus(centerY)
+            val relativeCoordinates = Pair(
+                tileSize.times(relativeVector.first).plus(centerX), // x
+                tileSize.times(relativeVector.second).plus(centerY) // y
+            )
 
             var modifier = Modifier
                 .size(tileSize)
                 .offset(
-                    x = relativeX,
-                    y = relativeY
+                    x = relativeCoordinates.first,
+                    y = relativeCoordinates.second
                 )
 
             var colorFilter: ColorFilter? = null
@@ -175,7 +173,7 @@ fun Game(gameViewModel: AppViewModel) {
                             isPuppyFound = true
                             delay(2000)
                             isPuppyFound = false
-                            gameViewModel.generateNewField()
+                            game.generateNewField()
                         }
                     }
                 }
