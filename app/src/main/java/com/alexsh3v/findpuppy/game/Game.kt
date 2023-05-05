@@ -49,7 +49,7 @@ fun Game(game: FindPuppyGame) {
         null
     }
 
-    var tileSize by remember {
+    val tileSize by remember {
         mutableStateOf(100.dp)
     }
 
@@ -73,10 +73,7 @@ fun Game(game: FindPuppyGame) {
     )
 
 
-    val movingVector = remember {
-        mutableStateOf(Pair(0, 0))
-    }
-    var clickedVector = remember {
+    val clickedVector = remember {
         mutableStateOf(Pair(centerX, centerY))
     }
     var isNearestTilePressed by remember {
@@ -134,7 +131,6 @@ fun Game(game: FindPuppyGame) {
 
             val animateX by animateDpAsState(
                 targetValue = newCalculatedVector.first,
-
                 animationSpec = tween(
                     durationMillis = 500,
                 )
@@ -156,13 +152,6 @@ fun Game(game: FindPuppyGame) {
 
             var colorFilter: ColorFilter? = null
 
-            // If distance to tile is zero
-            // that means that it is the selected tile.
-            // So we make yellow border to it
-            if (distance == 0) {
-//                modifier = modifier.border(3.dp, Color.Yellow)
-            }
-
             // For tile that are to the left, right, above and bottom
             if (!isGameSuspendedNecessarily && distance == 1) {
 
@@ -171,21 +160,15 @@ fun Game(game: FindPuppyGame) {
                     blendMode = BlendMode.Darken
                 )
 
-
                 modifier = modifier.clickable {
                     isNearestTilePressed = true
                     clickedVector.value = clickedVector.value.copy(
                         newCalculatedVector.first,
                         newCalculatedVector.second
                     )
-                    movingVector.value = movingVector.value.copy(
-                        relativeVector.first,
-                        relativeVector.second
-                    )
 
                     scope.launch {
 
-                        // todo: move into function to automatically set flags
                         isGameSuspendedNecessarily = true
                         delay(1000)
                         isGameSuspendedNecessarily = false
@@ -236,6 +219,6 @@ fun SelectImageByTile(tileObject: Tile, resourceState: MutableState<Int>) {
             else -> R.raw.grass_pressed_tile
         }
 
-        else -> R.raw.grass_pressed_tile
+        else -> R.raw.debug_tile // in case something went wrong just draw this tile
     }
 }
