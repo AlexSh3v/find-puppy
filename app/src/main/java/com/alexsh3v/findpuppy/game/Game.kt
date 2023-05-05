@@ -3,6 +3,7 @@ package com.alexsh3v.findpuppy.game
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -72,6 +73,9 @@ fun Game(game: FindPuppyGame) {
     )
 
 
+    val movingVector = remember {
+        mutableStateOf(Pair(0, 0))
+    }
     var clickedVector = remember {
         mutableStateOf(Pair(centerX, centerY))
     }
@@ -80,9 +84,15 @@ fun Game(game: FindPuppyGame) {
     }
     val selectedBorderX by animateDpAsState(
         targetValue = if (isNearestTilePressed && !isPuppyFound) clickedVector.value.first else centerX,
+        animationSpec = tween(
+            durationMillis = 500,
+        )
     )
     val selectedBorderY by animateDpAsState(
-        targetValue = if (isNearestTilePressed && !isPuppyFound) clickedVector.value.second else centerY
+        targetValue = if (isNearestTilePressed && !isPuppyFound) clickedVector.value.second else centerY,
+        animationSpec = tween(
+            durationMillis = 500,
+        )
     )
     Image(
         painter = painterResource(id = R.raw.selected_border),
@@ -90,8 +100,8 @@ fun Game(game: FindPuppyGame) {
         modifier = Modifier
             .size(tileSize)
             .offset(
-                if (isNearestTilePressed) selectedBorderX else centerX,
-                if (isNearestTilePressed) selectedBorderY else centerY
+                x = selectedBorderX,
+                y = selectedBorderY
             )
             .zIndex(2f)
     )
@@ -122,11 +132,26 @@ fun Game(game: FindPuppyGame) {
                 tileSize.times(relativeVector.second).plus(centerY) // y
             )
 
+            val animateX by animateDpAsState(
+                targetValue = newCalculatedVector.first,
+
+                animationSpec = tween(
+                    durationMillis = 500,
+                )
+            )
+
+            val animateY by animateDpAsState(
+                targetValue =  newCalculatedVector.second,
+                animationSpec = tween(
+                    durationMillis = 500,
+                )
+            )
+
             var modifier = Modifier
                 .size(tileSize)
                 .offset(
-                    x = newCalculatedVector.first,
-                    y = newCalculatedVector.second
+                    x = animateX,
+                    y = animateY
                 )
 
             var colorFilter: ColorFilter? = null
@@ -152,6 +177,10 @@ fun Game(game: FindPuppyGame) {
                     clickedVector.value = clickedVector.value.copy(
                         newCalculatedVector.first,
                         newCalculatedVector.second
+                    )
+                    movingVector.value = movingVector.value.copy(
+                        relativeVector.first,
+                        relativeVector.second
                     )
 
                     scope.launch {
