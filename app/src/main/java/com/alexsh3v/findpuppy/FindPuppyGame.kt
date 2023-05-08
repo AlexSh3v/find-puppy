@@ -86,6 +86,17 @@ class FindPuppyGame {
 
         listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
 
+        // TODO: refactor repeating code
+        for (i in 0 .. 6) {
+            var emptyTile: Tile
+            do {
+                randomX = Random.nextInt(fieldRange.first, fieldRange.second)
+                randomY = Random.nextInt(fieldRange.first, fieldRange.second)
+                emptyTile = listOfTiles.value[randomY][randomX]
+            } while (!emptyTile.isEmpty())
+            getTileAt(randomY, randomX).changeType(getRandomEnemy())
+        }
+
         var emptyTile: Tile
         do {
             randomX = Random.nextInt(fieldRange.first, fieldRange.second)
@@ -112,6 +123,13 @@ class FindPuppyGame {
             Tile.Type.Bush3,
             Tile.Type.Bush4,
         )[Random.nextInt(0, Tile.DECORATION_NUMBER)]
+    }
+
+    private fun getRandomEnemy(): Tile.Type {
+        return listOf(
+            Tile.Type.WithEnemyMan,
+            Tile.Type.WithEnemyWoman
+        )[Random.nextInt(Tile.ENEMY_NUMBER)]
     }
 
     private fun isInField(i: Int, j: Int): Boolean {

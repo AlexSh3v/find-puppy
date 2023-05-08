@@ -40,12 +40,15 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     }
 
     companion object {
+        const val ENEMY_NUMBER = 2
         const val DECORATION_NUMBER = 6
     }
 
     enum class Type {
-        Neutral, WithPuppy, WithEnemy, WithItems, Decoration, Dirt,
-        LonelyTree, Bush1, Bush2, Bush3, Bush4, TribeOfTrees
+        Neutral, WithPuppy,
+        WithEnemyMan, WithEnemyWoman,
+        Decoration, Dirt, LonelyTree, Bush1, Bush2, Bush3, Bush4, TribeOfTrees,
+        WithItems
     }
     fun isDecoration(): Boolean {
         val t = getType()
@@ -64,7 +67,11 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     }
 
     fun isEmpty(): Boolean {
-        return _type.value == Type.Neutral || _type.value == Type.Dirt
+        return _type.value == Type.Neutral
+    }
+
+    fun isEnemy(): Boolean {
+        return _type.value in listOf(Type.WithEnemyMan, Type.WithEnemyWoman)
     }
 
 }

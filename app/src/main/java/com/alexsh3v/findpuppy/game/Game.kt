@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -21,17 +20,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
+import com.alexsh3v.findpuppy.VibrationMode
+import com.alexsh3v.findpuppy.ui.theme.AllowToGo
+import com.alexsh3v.findpuppy.ui.theme.EnemySpotted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
-fun App(game: FindPuppyGame) {
+fun App(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
     val screenType by game.screenType.collectAsState()
 
     when (screenType) {
         FindPuppyGame.ScreenType.Menu -> Menu(game)
-        FindPuppyGame.ScreenType.Game -> Game(game)
+        FindPuppyGame.ScreenType.Game -> Game(game, vibrationCallback = vibrationCallback)
     }
 
 }
@@ -43,7 +45,7 @@ fun Menu(gameViewModel: FindPuppyGame) {
 
 @SuppressLint("ResourceType")
 @Composable
-fun Game(game: FindPuppyGame) {
+fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
 
     remember {
         game.generateNewField()
@@ -65,6 +67,9 @@ fun Game(game: FindPuppyGame) {
     var isPuppyFound by remember {
         mutableStateOf(false)
     }
+    var isEnemyFound by remember {
+        mutableStateOf(false)
+    }
     val centerX = screenWidth.div(2).minus(tileSize.div(2))
     val centerY = screenHeight.div(2).minus(tileSize.div(2))
     val selectedTile = game.selectedTile.collectAsState().value
@@ -80,13 +85,13 @@ fun Game(game: FindPuppyGame) {
         mutableStateOf(false)
     }
     val selectedBorderX by animateDpAsState(
-        targetValue = if (isNearestTilePressed && !isPuppyFound) clickedVector.value.first else centerX,
+        targetValue = if (isNearestTilePressed && !isPuppyFound && !isEnemyFound) clickedVector.value.first else centerX,
         animationSpec = tween(
             durationMillis = 500,
         )
     )
     val selectedBorderY by animateDpAsState(
-        targetValue = if (isNearestTilePressed && !isPuppyFound) clickedVector.value.second else centerY,
+        targetValue = if (isNearestTilePressed && !isPuppyFound && !isEnemyFound) clickedVector.value.second else centerY,
         animationSpec = tween(
             durationMillis = 500,
         )
@@ -152,11 +157,24 @@ fun Game(game: FindPuppyGame) {
 
             var colorFilter: ColorFilter? = null
 
+            if (distance == 0 && tileObject.isEnemy()) {
+                colorFilter = ColorFilter.tint(
+                    EnemySpotted,
+                    blendMode = BlendMode.Darken
+                )
+            }
+
+            if (distance == 1 && tileObject.isEnemy() && !isPuppyFound)
+                remember {
+                    vibrationCallback(VibrationMode.EnemyNearby)
+                    null
+                }
+
             // For tile that are to the left, right, above and bottom
             if (!isGameSuspendedNecessarily && distance == 1 && !tileObject.isDecoration() && type != Tile.Type.Dirt) {
 
                 colorFilter = ColorFilter.tint(
-                    Color(0x43000000), // todo: export color
+                    AllowToGo,
                     blendMode = BlendMode.Darken
                 )
 
@@ -179,12 +197,21 @@ fun Game(game: FindPuppyGame) {
                         selectedTile.bindPosition(i, j)
 
                         if (type == Tile.Type.WithPuppy) {
-
+                            vibrationCallback(VibrationMode.PuppySpotted)
                             isGameSuspendedNecessarily = true
                             isPuppyFound = true
                             delay(2000)
                             isGameSuspendedNecessarily = false
                             isPuppyFound = false
+                            game.generateNewField()
+                        }
+
+                        if (tileObject.isEnemy()) {
+                            isGameSuspendedNecessarily = true
+                            isEnemyFound = true
+                            delay(3000)
+                            isGameSuspendedNecessarily = false
+                            isEnemyFound = false
                             game.generateNewField()
                         }
 
@@ -231,6 +258,8 @@ fun SelectImageByTile(tileObject: Tile, resourceState: MutableState<Int>) {
         Tile.State.Shown -> when (type) {
             Tile.Type.Neutral -> R.raw.grass_pressed_tile
             Tile.Type.WithPuppy -> R.raw.puppy
+            Tile.Type.WithEnemyMan -> R.raw.enemy_face_man
+            Tile.Type.WithEnemyWoman -> R.raw.enemy_face_woman
             Tile.Type.Decoration -> R.raw.trees_tile
             Tile.Type.Dirt -> R.raw.dirt
             Tile.Type.Bush1 -> R.raw.dirt_with_bush_type_1
