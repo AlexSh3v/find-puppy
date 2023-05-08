@@ -45,7 +45,7 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     }
 
     enum class State {
-        HiddenActive, Hidden, ShownActive, Shown
+        Hidden, Shown
     }
 
 
@@ -54,14 +54,8 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
         this._j.value = j
     }
 
-
-    fun open() {
-
-    }
-
     fun isEmpty(): Boolean {
-        return _type.value == Type.Neutral
+        return _type.value == Type.Neutral || _type.value == Type.Empty
     }
-
 
 }

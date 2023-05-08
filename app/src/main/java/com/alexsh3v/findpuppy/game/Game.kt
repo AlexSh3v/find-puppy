@@ -72,23 +72,6 @@ fun Game(game: FindPuppyGame) {
         selectedTile.i.collectAsState(initial = 0).value,
         selectedTile.j.collectAsState(initial = 0).value
     )
-//
-//    val tilesRelativePosition by remember {
-//        mutableStateOf(ArrayList<ArrayList<MutableState<<Pair<Int, Int>>>>().apply {
-//
-//            for (i in 0 until game.totalFieldSize) {
-//                val newArray = ArrayList<Pair<Int, Int>>()
-//                for (j in 0 until game.totalFieldSize) {
-//                    newArray.add(
-//                        MutableState((Pair(i - selectedTileVector.first, j - selectedTileVector.second)))
-//                    )
-//                }
-//                add(newArray)
-//            }
-//
-//        })
-//    }
-
 
     val clickedVector = remember {
         mutableStateOf(Pair(centerX, centerY))

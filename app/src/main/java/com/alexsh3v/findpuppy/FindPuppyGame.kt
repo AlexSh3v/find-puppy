@@ -78,8 +78,6 @@ class FindPuppyGame {
                 }
             }
 
-        debugLogFieldWithStates()
-
         // Place Puppy
         val fieldRange = Pair(
             OUT_FIELD_LAYER_NUMBER, totalFieldSize - OUT_FIELD_LAYER_NUMBER
@@ -89,18 +87,6 @@ class FindPuppyGame {
 
         listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
 
-        // CHECK PUPPIES
-        var puppyCount = 0
-        for (i in 0 until totalFieldSize) {
-            for (j in 0 until totalFieldSize) {
-                if (getTileAt(i, j).getType() == Tile.Type.WithPuppy)
-                    puppyCount++
-            }
-        }
-
-        Log.d(TAG, "PUPPY COUNT: $puppyCount")
-        Log.d(TAG, "PUPPY POS: i=$randomY j=$randomX")
-
         var emptyTile: Tile
         do {
             randomX = Random.nextInt(fieldRange.first, fieldRange.second)
@@ -108,7 +94,6 @@ class FindPuppyGame {
             emptyTile = listOfTiles.value[randomY][randomX]
         } while (!emptyTile.isEmpty())
 
-        // FIXME: MAKE SURE THIS IS NOT CORRUPTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         selectedTile.value.bindPosition(randomY, randomX)
         listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
     }
@@ -118,7 +103,7 @@ class FindPuppyGame {
             Tile.Type.Decoration else Tile.Type.Empty
     }
 
-    fun isInField(i: Int, j: Int): Boolean {
+    private fun isInField(i: Int, j: Int): Boolean {
         return (OUT_FIELD_LAYER_NUMBER <= i && i <= OUT_FIELD_LAYER_NUMBER + FIELD_SIZE - 1)
                 && (OUT_FIELD_LAYER_NUMBER <= j && j <= OUT_FIELD_LAYER_NUMBER + FIELD_SIZE - 1)
     }
