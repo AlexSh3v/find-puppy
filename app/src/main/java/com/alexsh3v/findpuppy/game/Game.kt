@@ -1,6 +1,7 @@
 package com.alexsh3v.findpuppy.game
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -15,10 +16,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.alexsh3v.findpuppy.FindPuppyGame
-import com.alexsh3v.findpuppy.FindPuppyGame.Companion.FIELD_SIZE
 import com.alexsh3v.findpuppy.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,6 +72,22 @@ fun Game(game: FindPuppyGame) {
         selectedTile.i.collectAsState(initial = 0).value,
         selectedTile.j.collectAsState(initial = 0).value
     )
+//
+//    val tilesRelativePosition by remember {
+//        mutableStateOf(ArrayList<ArrayList<MutableState<<Pair<Int, Int>>>>().apply {
+//
+//            for (i in 0 until game.totalFieldSize) {
+//                val newArray = ArrayList<Pair<Int, Int>>()
+//                for (j in 0 until game.totalFieldSize) {
+//                    newArray.add(
+//                        MutableState((Pair(i - selectedTileVector.first, j - selectedTileVector.second)))
+//                    )
+//                }
+//                add(newArray)
+//            }
+//
+//        })
+//    }
 
 
     val clickedVector = remember {
@@ -104,8 +121,8 @@ fun Game(game: FindPuppyGame) {
     )
 
 
-    for (i in 0 until FIELD_SIZE) {
-        for (j in 0 until FIELD_SIZE) {
+    for (i in 0 until game.totalFieldSize) {
+        for (j in 0 until game.totalFieldSize) {
 
             val tileObject = game.getTileAt(i, j)
             tileObject.bindPosition(i, j)
@@ -116,7 +133,7 @@ fun Game(game: FindPuppyGame) {
                 SelectImageByTile(tileObject = tileObject, resourceState = it)
             }
 
-            val type = tileObject.type.collectAsState(initial = Tile.Type.WithPuppy).value
+            val type = tileObject.type.collectAsState(initial = Tile.Type.Neutral).value
 
             val relativeVector = Pair(
                 i - selectedTileVector.first, // x
@@ -153,7 +170,7 @@ fun Game(game: FindPuppyGame) {
             var colorFilter: ColorFilter? = null
 
             // For tile that are to the left, right, above and bottom
-            if (!isGameSuspendedNecessarily && distance == 1) {
+            if (!isGameSuspendedNecessarily && distance == 1 && type != Tile.Type.Decoration) {
 
                 colorFilter = ColorFilter.tint(
                     Color(0x43000000), // todo: export color
@@ -166,6 +183,7 @@ fun Game(game: FindPuppyGame) {
                         newCalculatedVector.first,
                         newCalculatedVector.second
                     )
+
 
                     scope.launch {
 
@@ -193,17 +211,30 @@ fun Game(game: FindPuppyGame) {
                 }
             }
 
-            Image(
-                painter = painterResource(id = resourceState.value),
-                contentDescription = "image at $i $j",
-                contentScale = ContentScale.Fit,
-                modifier = modifier,
-                colorFilter = colorFilter
+            val isOnScreen = isPositionInScreen(
+                screenConfig = configuration,
+                vectorPair = newCalculatedVector,
+                additionalRadius = 200.dp
             )
+
+            if (type != Tile.Type.Empty && isOnScreen)
+                Image(
+                    painter = painterResource(id = resourceState.value),
+                    contentDescription = "image at $i $j",
+                    contentScale = ContentScale.Fit,
+                    modifier = modifier,
+                    colorFilter = colorFilter
+                )
 
         }
 
     }
+}
+
+fun isPositionInScreen(screenConfig: Configuration, vectorPair: Pair<Dp, Dp>, additionalRadius: Dp): Boolean {
+    val screenSize = Pair(screenConfig.screenWidthDp.dp, screenConfig.screenHeightDp.dp)
+    return (-additionalRadius <= vectorPair.first && vectorPair.first <= screenSize.first.plus(additionalRadius))
+            && (-additionalRadius <= vectorPair.second && vectorPair.second <= screenSize.second.plus(additionalRadius))
 }
 
 @Composable
@@ -215,8 +246,10 @@ fun SelectImageByTile(tileObject: Tile, resourceState: MutableState<Int>) {
         Tile.State.Hidden -> R.raw.grass_default_tile
 
         Tile.State.Shown -> when (type) {
+            Tile.Type.Neutral -> R.raw.grass_pressed_tile
             Tile.Type.WithPuppy -> R.raw.puppy
-            else -> R.raw.grass_pressed_tile
+            Tile.Type.Decoration -> R.raw.trees_tile
+            else -> R.raw.debug_tile
         }
 
         else -> R.raw.debug_tile // in case something went wrong just draw this tile

@@ -11,7 +11,9 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     val j: Flow<Int>
         get() = _j
 
-    private var _state: MutableStateFlow<State>
+    fun getPositionPair(): Pair<Int, Int> = Pair(_i.value, _j.value)
+
+    private var _state = MutableStateFlow(State.Hidden)
     val state: Flow<State>
         get() = _state
 
@@ -28,6 +30,8 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
         _type.value = type
     }
 
+    fun getType(): Type = _type.value
+
     init {
         this._type = MutableStateFlow(type)
         this._i = MutableStateFlow(0)
@@ -37,7 +41,7 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
 
 
     enum class Type {
-        Neutral, WithPuppy, WithEnemy, WithItems
+        Neutral, WithPuppy, WithEnemy, WithItems, Decoration, Empty
     }
 
     enum class State {

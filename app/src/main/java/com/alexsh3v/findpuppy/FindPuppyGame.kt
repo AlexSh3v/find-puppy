@@ -1,5 +1,7 @@
 package com.alexsh3v.findpuppy
 
+import android.util.Log
+import androidx.compose.ui.unit.dp
 import com.alexsh3v.findpuppy.game.Tile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
@@ -11,7 +13,10 @@ class FindPuppyGame {
     }
 
     companion object {
-        const val FIELD_SIZE = 8
+        private const val FIELD_SIZE = 8
+        private const val OUT_FIELD_LAYER_NUMBER = 5
+        private const val TAG = "FindPuppyGame"
+        private const val CHANCE_OF_DECORATION_PERCENT = 20
     }
 
     // TODO: CHANGE TO "MENU"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -20,7 +25,13 @@ class FindPuppyGame {
     var listOfTiles = MutableStateFlow(ArrayList<ArrayList<Tile>>())
     var selectedTile = MutableStateFlow(Tile())
 
+    val totalFieldSize: Int
+        get() = FIELD_SIZE + OUT_FIELD_LAYER_NUMBER * 2
+
     fun generateNewField() {
+        // FIXME: code probably will break after scaling width and height
+        //        of "listOfTiles" array, because of how I wrote it :)
+
         /*
         Field representation:
                       i
@@ -32,33 +43,68 @@ class FindPuppyGame {
         V
          */
 
-        // Create field FIELD_SIZE x FIELD_SIZE
+        // Create field "totalFieldSize" x "totalFieldSize"
         // Fill with random content in tile
         if (listOfTiles.value.size == 0)
-            for (i in 0 until FIELD_SIZE) {
+            for (i in 0 until totalFieldSize) {
                 val newList = ArrayList<Tile>()
                 listOfTiles.value.add(newList)
-                for (j in 0 until FIELD_SIZE) {
-                    newList.add(Tile(Tile.Type.Neutral))
+                for (j in 0 until totalFieldSize) {
+                    newList.add(
+                        when {
+                            isInField(i, j) -> Tile(Tile.Type.Neutral).apply {
+                                changeState(Tile.State.Hidden)
+                            }
+                            else -> Tile(getRandomDecorationType()).apply {
+                                changeState(Tile.State.Shown)
+                            }
+                        }
+                    )
                 }
             }
         else
-            for (i in 0 until FIELD_SIZE) {
-                for (tile in listOfTiles.value[i]) {
-                    tile.changeType(Tile.Type.Neutral)
-                    tile.changeState(Tile.State.Hidden)
+            for (i in 0 until totalFieldSize) {
+                for ((j, tile) in listOfTiles.value[i].withIndex()) {
+                    when {
+                        isInField(i, j) -> {
+                            tile.changeType(Tile.Type.Neutral)
+                            tile.changeState(Tile.State.Hidden)
+                        }
+                        else -> {
+                            tile.changeType(getRandomDecorationType())
+                            tile.changeState(Tile.State.Shown)
+                        }
+                    }
                 }
             }
 
+        debugLogFieldWithStates()
+
         // Place Puppy
-        var randomX = Random.nextInt(0, FIELD_SIZE - 1)
-        var randomY = Random.nextInt(0, FIELD_SIZE - 1)
+        val fieldRange = Pair(
+            OUT_FIELD_LAYER_NUMBER, totalFieldSize - OUT_FIELD_LAYER_NUMBER
+        )
+        var randomX = Random.nextInt(fieldRange.first, fieldRange.second)
+        var randomY = Random.nextInt(fieldRange.first, fieldRange.second)
+
         listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
+
+        // CHECK PUPPIES
+        var puppyCount = 0
+        for (i in 0 until totalFieldSize) {
+            for (j in 0 until totalFieldSize) {
+                if (getTileAt(i, j).getType() == Tile.Type.WithPuppy)
+                    puppyCount++
+            }
+        }
+
+        Log.d(TAG, "PUPPY COUNT: $puppyCount")
+        Log.d(TAG, "PUPPY POS: i=$randomY j=$randomX")
 
         var emptyTile: Tile
         do {
-            randomX = Random.nextInt(0, FIELD_SIZE - 1)
-            randomY = Random.nextInt(0, FIELD_SIZE - 1)
+            randomX = Random.nextInt(fieldRange.first, fieldRange.second)
+            randomY = Random.nextInt(fieldRange.first, fieldRange.second)
             emptyTile = listOfTiles.value[randomY][randomX]
         } while (!emptyTile.isEmpty())
 
@@ -67,12 +113,68 @@ class FindPuppyGame {
         listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
     }
 
+    private fun getRandomDecorationType(): Tile.Type {
+        return if (Random.nextInt(0, 101) >= (100 - CHANCE_OF_DECORATION_PERCENT))
+            Tile.Type.Decoration else Tile.Type.Empty
+    }
+
+    fun isInField(i: Int, j: Int): Boolean {
+        return (OUT_FIELD_LAYER_NUMBER <= i && i <= OUT_FIELD_LAYER_NUMBER + FIELD_SIZE - 1)
+                && (OUT_FIELD_LAYER_NUMBER <= j && j <= OUT_FIELD_LAYER_NUMBER + FIELD_SIZE - 1)
+    }
+
     fun getTileAt(i: Int, j: Int): Tile {
 
-        if (i !in 0 until FIELD_SIZE || j !in 0 until FIELD_SIZE)
+        if (i !in 0 until totalFieldSize || j !in 0 until totalFieldSize)
             throw IndexOutOfBoundsException("got unexpected position: ($i, $j)")
 
         return listOfTiles.value[i][j]
     }
 
+    fun debugLogFieldWithStates(pos: Pair<Int, Int>? = null) {
+
+        // Debug info
+        if (pos == null)
+            Log.d(TAG, "[[[ CREATED LIST ]]]")
+        else
+            Log.d(TAG, "[[[ MOVED IN THE LIST ]]]")
+
+        Log.d(TAG, "TOTAL: $totalFieldSize")
+
+        var tile: Tile
+        var s = ""
+        for (i in 0 until totalFieldSize) {
+            for (j in 0 until totalFieldSize) {
+                tile = getTileAt(i, j)
+                var element = if (tile.getType() == Tile.Type.Decoration) "." else "N"
+                if (pos != null) {
+                    element = if (pos.first == i && pos.second == j)
+                        "<$element>"
+                    else
+                        " $element "
+                }
+                s += "$element "
+            }
+            s += "\n"
+        }
+
+        Log.d(TAG, s)
+    }
+
+    fun isPositionNearSelected(
+        positionInArray: Pair<Int, Int>,
+        additionalRadius: Int = 10
+    ): Boolean {
+        val i = positionInArray.first
+        val j = positionInArray.second
+        val selectedPair = selectedTile.value.getPositionPair()
+
+        val isInVertical =
+            (selectedPair.first - additionalRadius <= i && i <= selectedPair.first + additionalRadius)
+        val isInHorizontal =
+            (selectedPair.second - additionalRadius <= j && j <= selectedPair.second + additionalRadius)
+
+        return isInHorizontal && isInVertical
+
+    }
 }

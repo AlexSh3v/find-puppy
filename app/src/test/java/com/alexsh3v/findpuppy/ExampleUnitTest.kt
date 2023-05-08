@@ -1,5 +1,6 @@
 package com.alexsh3v.findpuppy
 
+import android.util.Log
 import org.junit.Test
 
 import org.junit.Assert.*
