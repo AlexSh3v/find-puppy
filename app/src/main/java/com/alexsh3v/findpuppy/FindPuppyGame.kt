@@ -1,7 +1,6 @@
 package com.alexsh3v.findpuppy
 
 import android.util.Log
-import androidx.compose.ui.unit.dp
 import com.alexsh3v.findpuppy.game.Tile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
@@ -99,8 +98,20 @@ class FindPuppyGame {
     }
 
     private fun getRandomDecorationType(): Tile.Type {
-        return if (Random.nextInt(0, 101) >= (100 - CHANCE_OF_DECORATION_PERCENT))
-            Tile.Type.Decoration else Tile.Type.Empty
+
+        val isChanceSucceed = Random.nextInt(0, 101) >= (100 - CHANCE_OF_DECORATION_PERCENT)
+
+        if (!isChanceSucceed)
+            return Tile.Type.Dirt
+
+        return listOf(
+            Tile.Type.LonelyTree,
+            Tile.Type.TribeOfTrees,
+            Tile.Type.Bush1,
+            Tile.Type.Bush2,
+            Tile.Type.Bush3,
+            Tile.Type.Bush4,
+        )[Random.nextInt(0, Tile.DECORATION_NUMBER)]
     }
 
     private fun isInField(i: Int, j: Int): Boolean {
@@ -131,7 +142,7 @@ class FindPuppyGame {
         for (i in 0 until totalFieldSize) {
             for (j in 0 until totalFieldSize) {
                 tile = getTileAt(i, j)
-                var element = if (tile.getType() == Tile.Type.Decoration) "." else "N"
+                var element = if (tile.isDecoration()) "." else "N"
                 if (pos != null) {
                     element = if (pos.first == i && pos.second == j)
                         "<$element>"

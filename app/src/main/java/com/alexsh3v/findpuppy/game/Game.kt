@@ -153,7 +153,7 @@ fun Game(game: FindPuppyGame) {
             var colorFilter: ColorFilter? = null
 
             // For tile that are to the left, right, above and bottom
-            if (!isGameSuspendedNecessarily && distance == 1 && type != Tile.Type.Decoration) {
+            if (!isGameSuspendedNecessarily && distance == 1 && !tileObject.isDecoration() && type != Tile.Type.Dirt) {
 
                 colorFilter = ColorFilter.tint(
                     Color(0x43000000), // todo: export color
@@ -200,7 +200,7 @@ fun Game(game: FindPuppyGame) {
                 additionalRadius = 200.dp
             )
 
-            if (type != Tile.Type.Empty && isOnScreen)
+            if (isOnScreen)
                 Image(
                     painter = painterResource(id = resourceState.value),
                     contentDescription = "image at $i $j",
@@ -232,6 +232,13 @@ fun SelectImageByTile(tileObject: Tile, resourceState: MutableState<Int>) {
             Tile.Type.Neutral -> R.raw.grass_pressed_tile
             Tile.Type.WithPuppy -> R.raw.puppy
             Tile.Type.Decoration -> R.raw.trees_tile
+            Tile.Type.Dirt -> R.raw.dirt
+            Tile.Type.Bush1 -> R.raw.dirt_with_bush_type_1
+            Tile.Type.Bush2 -> R.raw.dirt_with_bush_type_2
+            Tile.Type.Bush3 -> R.raw.dirt_with_bush_type_3
+            Tile.Type.Bush4 -> R.raw.dirt_with_bush_type_4
+            Tile.Type.LonelyTree -> R.raw.dirt_with_alone_tree
+            Tile.Type.TribeOfTrees -> R.raw.dirt_with_group_of_trees
             else -> R.raw.debug_tile
         }
 

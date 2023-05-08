@@ -39,9 +39,18 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
         this._state = MutableStateFlow(State.Hidden)
     }
 
+    companion object {
+        const val DECORATION_NUMBER = 6
+    }
 
     enum class Type {
-        Neutral, WithPuppy, WithEnemy, WithItems, Decoration, Empty
+        Neutral, WithPuppy, WithEnemy, WithItems, Decoration, Dirt,
+        LonelyTree, Bush1, Bush2, Bush3, Bush4, TribeOfTrees
+    }
+    fun isDecoration(): Boolean {
+        val t = getType()
+        return t == Type.LonelyTree || t == Type.Bush1 || t == Type.Bush2
+                || t == Type.Bush3 || t == Type.Bush4 || t == Type.TribeOfTrees
     }
 
     enum class State {
@@ -55,7 +64,7 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
     }
 
     fun isEmpty(): Boolean {
-        return _type.value == Type.Neutral || _type.value == Type.Empty
+        return _type.value == Type.Neutral || _type.value == Type.Dirt
     }
 
 }
