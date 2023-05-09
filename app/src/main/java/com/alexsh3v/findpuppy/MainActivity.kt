@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.alexsh3v.findpuppy.game.App
-import com.alexsh3v.findpuppy.game.GameStatusBar
+import com.alexsh3v.findpuppy.game.StatusBar
 import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,7 +55,7 @@ fun DefaultPreview() {
         var stepsCounter by remember {
             mutableStateOf(0)
         }
-        GameStatusBar(
+        StatusBar(
             stepsCounter = { stepsCounter },
             timePassedInSeconds = { 0 },
             onPauseButtonClick = { stepsCounter++ },

@@ -50,6 +50,7 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
         Decoration, Dirt, LonelyTree, Bush1, Bush2, Bush3, Bush4, TribeOfTrees,
         WithItems
     }
+
     fun isDecoration(): Boolean {
         val t = getType()
         return t == Type.LonelyTree || t == Type.Bush1 || t == Type.Bush2

@@ -88,7 +88,7 @@ class FindPuppyGame {
         listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
 
         // TODO: refactor repeating code
-        for (i in 0 .. 6) {
+        for (i in 0..6) {
             var emptyTile: Tile
             do {
                 randomX = Random.nextInt(fieldRange.first, fieldRange.second)
