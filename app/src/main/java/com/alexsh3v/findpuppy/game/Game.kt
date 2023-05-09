@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -114,6 +115,8 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
 
             val tileObject = game.getTileAt(i, j)
             tileObject.bindPosition(i, j)
+
+            Log.d("FindPuppyGame", "recomposition!")
 
             val resourceState = remember {
                 mutableStateOf(R.raw.debug_tile)
@@ -228,17 +231,26 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
             )
 
             if (isOnScreen)
-                Image(
-                    painter = painterResource(id = resourceState.value),
-                    contentDescription = "image at $i $j",
-                    contentScale = ContentScale.Fit,
-                    modifier = modifier,
-                    colorFilter = colorFilter
+                TileUi(
+                    painter = { resourceState.value },
+                    modifier = { modifier },
+                    colorFilter = { colorFilter }
                 )
 
         }
 
     }
+}
+
+@Composable
+fun TileUi(painter: () -> Int, modifier: () -> Modifier, colorFilter: () -> ColorFilter?) {
+    Image(
+        painter = painterResource(id = painter()),
+        contentDescription = "",
+        contentScale = ContentScale.Fit,
+        modifier = modifier(),
+        colorFilter = colorFilter()
+    )
 }
 
 fun isPositionInScreen(screenConfig: Configuration, vectorPair: Pair<Dp, Dp>, additionalRadius: Dp): Boolean {
