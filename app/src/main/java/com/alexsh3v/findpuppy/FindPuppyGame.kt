@@ -14,7 +14,7 @@ class FindPuppyGame {
     companion object {
         private const val FIELD_SIZE = 8
         private const val OUT_FIELD_LAYER_NUMBER = 5
-        private const val TAG = "FindPuppyGame"
+        const val TAG = "FindPuppyGame"
         private const val CHANCE_OF_DECORATION_PERCENT = 20
     }
 

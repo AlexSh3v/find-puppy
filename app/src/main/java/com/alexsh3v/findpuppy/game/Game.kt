@@ -97,16 +97,26 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
             durationMillis = 500,
         )
     )
-    Image(
-        painter = painterResource(id = R.raw.selected_border),
-        contentDescription = "",
-        modifier = Modifier
-            .size(tileSize)
-            .offset(
-                x = selectedBorderX,
-                y = selectedBorderY
-            )
-            .zIndex(2f)
+
+    var borderResource by remember {
+        mutableStateOf(R.raw.selected_border)
+    }
+    val borderResourceDerived by remember {
+        derivedStateOf { borderResource }
+    }
+    SelectedBorder(
+        resourceId = {
+            Log.d(FindPuppyGame.TAG, "New border res -> ${
+                when (borderResourceDerived) {
+                    R.raw.selected_border -> "YELLOW"
+                    else -> "RED"
+                }
+            }")
+            borderResourceDerived
+         },
+        tileSize = { tileSize },
+        offsetX = { selectedBorderX },
+        offsetY = { selectedBorderY }
     )
 
 
@@ -137,34 +147,12 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
                 tileSize.times(relativeVector.second).plus(centerY) // y
             )
 
-            val animateX by animateDpAsState(
-                targetValue = newCalculatedVector.first,
-                animationSpec = tween(
-                    durationMillis = 500,
-                )
-            )
-
-            val animateY by animateDpAsState(
-                targetValue =  newCalculatedVector.second,
-                animationSpec = tween(
-                    durationMillis = 500,
-                )
-            )
-
-            var modifier = Modifier
-                .size(tileSize)
-                .offset(
-                    x = animateX,
-                    y = animateY
-                )
-
             var colorFilter: ColorFilter? = null
 
-            if (distance == 0 && tileObject.isEnemy()) {
-                colorFilter = ColorFilter.tint(
-                    EnemySpotted,
-                    blendMode = BlendMode.Darken
-                )
+            borderResource = if (isEnemyFound) {
+                R.raw.selected_red_border
+            } else {
+                R.raw.selected_border
             }
 
             if (distance == 1 && tileObject.isEnemy() && !isPuppyFound)
@@ -173,55 +161,16 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
                     null
                 }
 
-            // For tile that are to the left, right, above and bottom
-            if (!isGameSuspendedNecessarily && distance == 1 && !tileObject.isDecoration() && type != Tile.Type.Dirt) {
+            val isClickable  = !isGameSuspendedNecessarily
+                    && distance == 1
+                    && !tileObject.isDecoration()
+                    && type != Tile.Type.Dirt
 
+            if (isClickable) {
                 colorFilter = ColorFilter.tint(
                     AllowToGo,
                     blendMode = BlendMode.Darken
                 )
-
-                modifier = modifier.clickable {
-                    isNearestTilePressed = true
-                    clickedVector.value = clickedVector.value.copy(
-                        newCalculatedVector.first,
-                        newCalculatedVector.second
-                    )
-
-
-                    scope.launch {
-
-                        isGameSuspendedNecessarily = true
-                        delay(1000)
-                        isGameSuspendedNecessarily = false
-
-                        tileObject.changeState(Tile.State.Shown)
-                        Log.d("FindPuppyGame", "clicked at: $i $j")
-                        selectedTile.bindPosition(i, j)
-
-                        if (type == Tile.Type.WithPuppy) {
-                            vibrationCallback(VibrationMode.PuppySpotted)
-                            isGameSuspendedNecessarily = true
-                            isPuppyFound = true
-                            delay(2000)
-                            isGameSuspendedNecessarily = false
-                            isPuppyFound = false
-                            game.generateNewField()
-                        }
-
-                        if (tileObject.isEnemy()) {
-                            isGameSuspendedNecessarily = true
-                            isEnemyFound = true
-                            delay(3000)
-                            isGameSuspendedNecessarily = false
-                            isEnemyFound = false
-                            game.generateNewField()
-                        }
-
-                        isNearestTilePressed = false
-                    }
-
-                }
             }
 
             val isOnScreen = isPositionInScreen(
@@ -230,11 +179,68 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
                 additionalRadius = 200.dp
             )
 
+            val animateX by animateDpAsState(
+                targetValue = newCalculatedVector.first,
+                animationSpec = tween(
+                    durationMillis = 500,
+                )
+            )
+
+            val animateY by animateDpAsState(
+                targetValue = newCalculatedVector.second,
+                animationSpec = tween(
+                    durationMillis = 500,
+                )
+            )
+
             if (isOnScreen)
                 TileUi(
                     painter = { resourceState.value },
-                    modifier = { modifier },
-                    colorFilter = { colorFilter }
+                    tileSize = { tileSize },
+                    isClickable = { isClickable },
+                    offsetX = { animateX },
+                    offsetY = { animateY },
+                    colorFilter = { colorFilter },
+                    onClick = {
+                        isNearestTilePressed = true
+                        clickedVector.value = clickedVector.value.copy(
+                            newCalculatedVector.first,
+                            newCalculatedVector.second
+                        )
+
+                        scope.launch {
+
+                            isGameSuspendedNecessarily = true
+                            delay(1000)
+                            isGameSuspendedNecessarily = false
+
+                            tileObject.changeState(Tile.State.Shown)
+                            Log.d("FindPuppyGame", "clicked at: $i $j")
+                            selectedTile.bindPosition(i, j)
+
+                            if (type == Tile.Type.WithPuppy) {
+                                vibrationCallback(VibrationMode.PuppySpotted)
+                                isGameSuspendedNecessarily = true
+                                isPuppyFound = true
+                                delay(2000)
+                                isGameSuspendedNecessarily = false
+                                isPuppyFound = false
+                                game.generateNewField()
+                            }
+
+                            if (tileObject.isEnemy()) {
+                                isGameSuspendedNecessarily = true
+                                isEnemyFound = true
+                                delay(3000)
+                                isGameSuspendedNecessarily = false
+                                isEnemyFound = false
+                                game.generateNewField()
+                            }
+
+                            isNearestTilePressed = false
+
+                        }
+                    },
                 )
 
         }
@@ -243,13 +249,52 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
 }
 
 @Composable
-fun TileUi(painter: () -> Int, modifier: () -> Modifier, colorFilter: () -> ColorFilter?) {
+fun SelectedBorder(
+    resourceId: () -> Int,
+    tileSize: () -> Dp,
+    offsetX: () -> Dp,
+    offsetY: () -> Dp
+) {
+    Image(
+        painter = painterResource(id = resourceId()),
+        contentDescription = "",
+        modifier = Modifier
+            .size(tileSize())
+            .offset(
+                x = offsetX(),
+                y = offsetY()
+            )
+            .zIndex(2f)
+    )
+}
+
+@Composable
+fun TileUi(
+    painter: () -> Int,
+    tileSize: () -> Dp,
+    isClickable: () -> Boolean,
+    onClick: () -> Unit,
+    offsetX: () -> Dp,
+    offsetY: () -> Dp,
+    colorFilter: () -> ColorFilter?,
+) {
+    var modifier = Modifier
+        .size(tileSize())
+        .offset(
+            x = offsetX(),
+            y = offsetY()
+        )
+
+    if (isClickable()) {
+        modifier = modifier.clickable { onClick() }
+    }
+
     Image(
         painter = painterResource(id = painter()),
         contentDescription = "",
         contentScale = ContentScale.Fit,
-        modifier = modifier(),
-        colorFilter = colorFilter()
+        modifier = modifier,
+        colorFilter = colorFilter(),
     )
 }
 
