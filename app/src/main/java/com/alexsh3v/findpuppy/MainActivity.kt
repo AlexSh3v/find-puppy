@@ -8,11 +8,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.alexsh3v.findpuppy.game.App
+import com.alexsh3v.findpuppy.game.GameStatusBar
 import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
 
 class MainActivity : ComponentActivity() {
@@ -51,5 +52,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     FindPuppyTheme {
+        var stepsCounter by remember {
+            mutableStateOf(0)
+        }
+        GameStatusBar(
+            stepsCounter = { stepsCounter },
+            timePassedInSeconds = { 0 },
+            onPauseButtonClick = { stepsCounter++ },
+            isDebug = true
+        )
     }
 }
