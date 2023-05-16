@@ -17,6 +17,7 @@ class FindPuppyGame {
         const val TAG = "FindPuppyGame"
         const val UI_Z_INDEX = 10f
         const val PAUSE_Z_INDEX = 20f
+        const val LOADING_SCREEN_Z_INDEX = 100f
         private const val CHANCE_OF_DECORATION_PERCENT = 20
     }
 
@@ -29,7 +30,7 @@ class FindPuppyGame {
     val totalFieldSize: Int
         get() = FIELD_SIZE + OUT_FIELD_LAYER_NUMBER * 2
 
-    fun generateNewField() {
+    fun generateNewField(onGenerated: () -> Unit) {
         // FIXME: code probably will break after scaling width and height
         //        of "listOfTiles" array, because of how I wrote it :)
 
@@ -108,6 +109,8 @@ class FindPuppyGame {
 
         selectedTile.value.bindPosition(randomY, randomX)
         listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
+
+        onGenerated()
     }
 
     private fun getRandomDecorationType(): Tile.Type {

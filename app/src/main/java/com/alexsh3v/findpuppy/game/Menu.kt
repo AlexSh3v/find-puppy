@@ -1,6 +1,7 @@
 package com.alexsh3v.findpuppy.game
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,14 +22,19 @@ import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
 import com.alexsh3v.findpuppy.VibrationMode
 import com.alexsh3v.findpuppy.utils.Screen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("ResourceType")
 @Composable
 fun Menu(
     game: FindPuppyGame,
     vibrationCallback: (VibrationMode) -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    loadingScreenEvents: LoadingScreenEvents
 ) {
+
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier
@@ -53,7 +60,13 @@ fun Menu(
                     .offset(y = 120.dp)
                     .clip(RoundedCornerShape(99.dp))
                     .clickable {
-                        navController.navigate(Screen.Game.route)
+                        loadingScreenEvents.changeMob()
+                        loadingScreenEvents.load(3000)
+                        scope.launch {
+                            delay(1000)
+                            navController.navigate(Screen.Game.route)
+                            Log.d(FindPuppyGame.TAG, "TRIGGER?")
+                        }
                     }
             )
         }
