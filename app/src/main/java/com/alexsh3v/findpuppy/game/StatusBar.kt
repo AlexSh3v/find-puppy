@@ -72,7 +72,7 @@ fun StatusBar(
             modifier = Modifier
                 .padding(10.dp)
                 .clip(CircleShape.copy(CornerSize(99.dp)))
-                .size(pauseButtonSize.times(0)) // FIXME: add pause button later
+                .size(pauseButtonSize)
                 .clickable { onPauseButtonClick() },
             contentScale = ContentScale.Fit,
         )

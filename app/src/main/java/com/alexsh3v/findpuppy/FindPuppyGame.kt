@@ -16,6 +16,7 @@ class FindPuppyGame {
         private const val OUT_FIELD_LAYER_NUMBER = 5
         const val TAG = "FindPuppyGame"
         const val UI_Z_INDEX = 10f
+        const val PAUSE_Z_INDEX = 20f
         private const val CHANCE_OF_DECORATION_PERCENT = 20
     }
 

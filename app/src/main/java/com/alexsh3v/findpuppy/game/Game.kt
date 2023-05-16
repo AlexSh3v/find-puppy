@@ -8,9 +8,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -18,17 +24,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavHostController
 import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
 import com.alexsh3v.findpuppy.VibrationMode
 import com.alexsh3v.findpuppy.ui.theme.AllowToGo
+import com.alexsh3v.findpuppy.utils.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @SuppressLint("ResourceType")
 @Composable
-fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
+fun Game(
+    game: FindPuppyGame,
+    vibrationCallback: (VibrationMode) -> Unit,
+    navController: NavHostController
+) {
 
     remember {
         game.generateNewField()
@@ -51,6 +63,9 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
         mutableStateOf(false)
     }
     var isEnemyFound by remember {
+        mutableStateOf(false)
+    }
+    var isPaused by remember {
         mutableStateOf(false)
     }
     val centerX = screenWidth.div(2).minus(tileSize.div(2))
@@ -110,7 +125,19 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
         stepsCounter = { stepsCounter },
         timePassedInSeconds = { 0 },
         onPauseButtonClick = {
+            isPaused = true
+        }
+    )
 
+    PausePopupWindow(
+        isPaused = isPaused,
+        buttonSize = 100.dp,
+        gapWidth = 25.dp,
+        onReturnButton = {
+            isPaused = false
+        },
+        onMenuButton = {
+            navController.navigate(Screen.Menu.route)
         }
     )
 
@@ -244,6 +271,49 @@ fun Game(game: FindPuppyGame, vibrationCallback: (VibrationMode) -> Unit) {
         }
 
     }
+}
+
+@SuppressLint("ResourceType")
+@Composable
+fun PausePopupWindow(
+    isPaused: Boolean,
+    buttonSize: Dp,
+    gapWidth: Dp = 10.dp,
+    onReturnButton: () -> Unit,
+    onMenuButton: () -> Unit
+) {
+
+    Surface(
+        color = Color(0x99000000),
+        modifier = Modifier
+            .zIndex(FindPuppyGame.PAUSE_Z_INDEX)
+            .fillMaxSize(if (isPaused) 1f else 0f)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Image(
+                painter = painterResource(id = R.raw.button_play),
+                contentDescription = "",
+                modifier = Modifier.size(buttonSize)
+                    .clip(RoundedCornerShape(99.dp))
+                    .clickable(onClick = onReturnButton)
+            )
+
+            Spacer(modifier = Modifier.width(gapWidth))
+
+            Image(
+                painter = painterResource(id = R.raw.button_home),
+                contentDescription = "",
+                modifier = Modifier.size(buttonSize)
+                    .clip(RoundedCornerShape(99.dp))
+                    .clickable(onClick = onMenuButton)
+            )
+        }
+    }
+
 }
 
 
