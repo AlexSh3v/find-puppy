@@ -6,14 +6,18 @@ import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -129,6 +133,32 @@ fun Game(
         }
     )
 
+    val triggerPuppy: () -> Unit = {
+        Log.d(FindPuppyGame.TAG, "TRIGGER PUPPY RUN!!")
+        scope.launch {
+            vibrationCallback(VibrationMode.PuppySpotted)
+            isGameSuspendedNecessarily = true
+            isPuppyFound = true
+            delay(2000)
+            isGameSuspendedNecessarily = false
+            isPuppyFound = false
+            game.generateNewField()
+            stepsCounter = 0
+        }
+    }
+    val triggerEnemy: () -> Unit = {
+        Log.d(FindPuppyGame.TAG, "TRIGGER ENEMY RUN!!")
+        scope.launch {
+            isGameSuspendedNecessarily = true
+            isEnemyFound = true
+            delay(3000)
+            isGameSuspendedNecessarily = false
+            isEnemyFound = false
+            game.generateNewField()
+            stepsCounter = 0
+        }
+    }
+
     PausePopupWindow(
         isPaused = isPaused,
         buttonSize = 100.dp,
@@ -138,7 +168,10 @@ fun Game(
         },
         onMenuButton = {
             navController.navigate(Screen.Menu.route)
-        }
+        },
+
+        debugOnPuppy = triggerPuppy,
+        debugOnLost = triggerEnemy
     )
 
     for (i in 0 until game.totalFieldSize) {
@@ -242,24 +275,11 @@ fun Game(
                             selectedTile.bindPosition(i, j)
 
                             if (type == Tile.Type.WithPuppy) {
-                                vibrationCallback(VibrationMode.PuppySpotted)
-                                isGameSuspendedNecessarily = true
-                                isPuppyFound = true
-                                delay(2000)
-                                isGameSuspendedNecessarily = false
-                                isPuppyFound = false
-                                game.generateNewField()
-                                stepsCounter = 0
+                                triggerPuppy()
                             }
 
                             if (tileObject.isEnemy()) {
-                                isGameSuspendedNecessarily = true
-                                isEnemyFound = true
-                                delay(3000)
-                                isGameSuspendedNecessarily = false
-                                isEnemyFound = false
-                                game.generateNewField()
-                                stepsCounter = 0
+                                triggerEnemy()
                             }
 
                             isNearestTilePressed = false
@@ -280,8 +300,35 @@ fun PausePopupWindow(
     buttonSize: Dp,
     gapWidth: Dp = 10.dp,
     onReturnButton: () -> Unit,
-    onMenuButton: () -> Unit
+    onMenuButton: () -> Unit,
+
+    debugOnPuppy: () -> Unit = {},
+    debugOnLost: () -> Unit = {},
 ) {
+
+    var isDebug by remember {
+        mutableStateOf(false)
+    }
+
+
+    Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier
+            .fillMaxWidth(if (isPaused) 1f else 0f)
+            .zIndex(FindPuppyGame.PAUSE_Z_INDEX + 1)
+    ) {
+        Box(
+            modifier = Modifier
+//                .background(Color(0xffff0000))
+                .alpha(0f)
+                .size(40.dp)
+                .clickable {
+                    isDebug = !isDebug
+                }
+        ) {
+
+        }
+    }
 
     Surface(
         color = Color(0x99000000),
@@ -289,28 +336,61 @@ fun PausePopupWindow(
             .zIndex(FindPuppyGame.PAUSE_Z_INDEX)
             .fillMaxSize(if (isPaused) 1f else 0f)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(id = R.raw.button_play),
-                contentDescription = "",
-                modifier = Modifier.size(buttonSize)
-                    .clip(RoundedCornerShape(99.dp))
-                    .clickable(onClick = onReturnButton)
-            )
 
-            Spacer(modifier = Modifier.width(gapWidth))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+//                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = R.raw.button_play),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .clip(RoundedCornerShape(99.dp))
+                        .clickable(onClick = onReturnButton)
+                )
 
-            Image(
-                painter = painterResource(id = R.raw.button_home),
-                contentDescription = "",
-                modifier = Modifier.size(buttonSize)
-                    .clip(RoundedCornerShape(99.dp))
-                    .clickable(onClick = onMenuButton)
-            )
+                Spacer(modifier = Modifier.width(gapWidth))
+
+                Image(
+                    painter = painterResource(id = R.raw.button_home),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .clip(RoundedCornerShape(99.dp))
+                        .clickable(onClick = onMenuButton)
+                )
+            }
+
+            // DEBUG MENU
+            if (isDebug)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+
+                    Button(onClick = {
+                        onReturnButton()
+                        debugOnPuppy()
+                    }) {
+                        Text(text = "debug:WIN")
+                    }
+
+                    Button(onClick = {
+                        onReturnButton()
+                        debugOnLost()
+                    }) {
+                        Text(text = "debug:LOST")
+                    }
+
+                }
         }
     }
 
