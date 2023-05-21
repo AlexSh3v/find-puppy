@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import com.alexsh3v.findpuppy.game.App
 import com.alexsh3v.findpuppy.game.StatusBar
 import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
@@ -20,7 +19,7 @@ import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val game = FindPuppyGame()
+        val game = FindPuppyGame(applicationContext)
         setContent {
             FindPuppyTheme {
                 Surface(

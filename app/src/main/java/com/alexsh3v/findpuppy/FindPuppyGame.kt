@@ -1,11 +1,12 @@
 package com.alexsh3v.findpuppy
 
+import android.content.Context
 import android.util.Log
 import com.alexsh3v.findpuppy.game.Tile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
-class FindPuppyGame {
+class FindPuppyGame(val context: Context) {
 
     enum class ScreenType {
         Menu, Game
@@ -18,7 +19,9 @@ class FindPuppyGame {
         const val UI_Z_INDEX = 10f
         const val PAUSE_Z_INDEX = 20f
         const val LOADING_SCREEN_Z_INDEX = 100f
-        private const val CHANCE_OF_DECORATION_PERCENT = 20
+
+        private const val CHANCE_OF_DECORATION_PERCENT = 20//%
+        const val CHANCE_OF_ENEMY_SCREAM = 100//%
     }
 
     // TODO: CHANGE TO "MENU"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -195,5 +198,42 @@ class FindPuppyGame {
 
         return isInHorizontal && isInVertical
 
+    }
+
+    fun getNearestEnemies(): ArrayList<Tile> {
+        val position = selectedTile.value.getPositionPair()
+        val leftTop = Pair(
+            position.first - 1,
+            position.second - 1
+        )
+        val rightBottom = Pair(
+            position.first + 1,
+            position.second + 1
+        )
+        val enemiesList = ArrayList<Tile>()
+
+        for (i in leftTop.first .. rightBottom.first) {
+            for (j in leftTop.second .. rightBottom.second) {
+
+                if (!isInField(i, j))
+                    continue
+
+                val tile = getTileAt(i, j)
+
+                if (!tile.isEnemy())
+                    continue
+
+                enemiesList.add(tile)
+
+            }
+        }
+
+        return enemiesList
+
+    }
+
+    fun isChance(chancePercent: Int): Boolean {
+        val isChanceSucceed = Random.nextInt(0, 101) >= (100 - chancePercent)
+        return isChanceSucceed
     }
 }
