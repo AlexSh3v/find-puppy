@@ -3,7 +3,6 @@ package com.alexsh3v.findpuppy.game
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -156,6 +155,7 @@ fun Game(
         stepsCounter = { stepsCounter },
         timePassedInSeconds = { 0 },
         onPauseButtonClick = {
+            audioManager.playUiSound()
             isPaused = true
         }
     )
@@ -204,9 +204,11 @@ fun Game(
         buttonSize = 100.dp,
         gapWidth = 25.dp,
         onReturnButton = {
+            audioManager.playUiSound()
             isPaused = false
         },
         onMenuButton = {
+            audioManager.playUiSound()
             scope.launch {
                 loadingScreen.changeMob()
                 loadingScreen.load(2000)
@@ -301,6 +303,11 @@ fun Game(
                     offsetY = { animateY },
                     colorFilter = { colorFilter },
                     onClick = {
+
+                        audioManager.playSpecific(
+                            resourceId = R.raw.sound_footsteps,
+                        )
+
                         stepsCounter++
 
                         isNearestTilePressed = true

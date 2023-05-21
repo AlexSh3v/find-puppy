@@ -1,6 +1,7 @@
 package com.alexsh3v.findpuppy.utils
 
 import android.content.Context
+import android.media.PlaybackParams
 import android.util.Log
 import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
@@ -41,12 +42,13 @@ class AudioManager(
         }
     }
 
-    fun playSpecific(resourceId: Int) {
-        audioQueue.add(
-            AudioPlayer(context).apply {
-                play(resourceId)
-            }
-        )
+    fun playSpecific(resourceId: Int, speed: Float = 1f) {
+        val audioPlayer = AudioPlayer(context)
+        audioPlayer.play(resourceId, onPrepareCallback = {
+            it.playbackParams = PlaybackParams()
+                .setSpeed(speed)
+        })
+        audioQueue.add(audioPlayer)
     }
 
     private fun getAudioResourceFileBy(type: Tile.Type): List<Int> {
@@ -67,6 +69,9 @@ class AudioManager(
                 R.raw.scream_woman_0,
                 R.raw.scream_woman_1,
                 R.raw.scream_woman_2,
+                R.raw.scream_woman_3,
+                R.raw.scream_woman_4,
+                R.raw.scream_woman_5,
             )
 
             else ->
@@ -86,6 +91,10 @@ class AudioManager(
 
         audioQueue.add(player)
 
+    }
+
+    fun playUiSound() {
+        playSpecific(R.raw.sound_button_pressed)
     }
 
 }

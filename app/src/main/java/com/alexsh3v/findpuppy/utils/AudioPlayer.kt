@@ -2,6 +2,7 @@ package com.alexsh3v.findpuppy.utils
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.media.PlaybackParams
 
 class AudioPlayer(
     private val context: Context
@@ -12,12 +13,12 @@ class AudioPlayer(
 
     private var mediaPlayer: MediaPlayer? = null
 
-    override fun play(resourceId: Int) {
+    override fun play(resourceId: Int, onPrepareCallback: ((MediaPlayer) -> Unit)?) {
 
         MediaPlayer.create(context, resourceId).apply {
             mediaPlayer = this
+            onPrepareCallback?.invoke(this)
             start()
-
         }
     }
 
@@ -29,5 +30,9 @@ class AudioPlayer(
         }
 
         mediaPlayer = null
+    }
+
+    override fun setSpeed(x: Float) {
+        mediaPlayer?.playbackParams = PlaybackParams().setSpeed(x)
     }
 }
