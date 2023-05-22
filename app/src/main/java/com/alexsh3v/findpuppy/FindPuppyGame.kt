@@ -16,13 +16,16 @@ class FindPuppyGame(val context: Context) {
         private const val FIELD_SIZE = 8
         private const val OUT_FIELD_LAYER_NUMBER = 5
         const val TAG = "FindPuppyGame"
-        const val UI_Z_INDEX = 10f
+        const val REST_SCREEN_Z_INDEX = 100f
         const val PAUSE_Z_INDEX = 20f
+        const val UI_SCREEN_Z_INDEX = 10f
         const val LOADING_SCREEN_Z_INDEX = 100f
 
         private const val CHANCE_OF_DECORATION_PERCENT = 20//%
         const val CHANCE_OF_ENEMY_SCREAM = 100//%
     }
+
+    var fieldSizePair: Pair<Int, Int> = Pair(2, 2)
 
     // TODO: CHANGE TO "MENU"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //       ------------------------------------vvvv
@@ -33,7 +36,7 @@ class FindPuppyGame(val context: Context) {
     val totalFieldSize: Int
         get() = FIELD_SIZE + OUT_FIELD_LAYER_NUMBER * 2
 
-    fun generateNewField(onGenerated: () -> Unit) {
+    fun generateNewField(showSelectedTile: Boolean, stayInPosition: Pair<Int, Int>? = null) {
         // FIXME: code probably will break after scaling width and height
         //        of "listOfTiles" array, because of how I wrote it :)
 
@@ -76,44 +79,63 @@ class FindPuppyGame(val context: Context) {
                             tile.changeState(Tile.State.Hidden)
                         }
                         else -> {
-                            tile.changeType(getRandomDecorationType())
-                            tile.changeState(Tile.State.Shown)
+//                            tile.changeType(getRandomDecorationType())
+//                            tile.changeState(Tile.State.Shown)
                         }
                     }
                 }
             }
 
+        val stayPositionX = stayInPosition?.second ?: -1
+        val stayPositionY = stayInPosition?.first ?: -1
+
         // Place Puppy
         val fieldRange = Pair(
             OUT_FIELD_LAYER_NUMBER, totalFieldSize - OUT_FIELD_LAYER_NUMBER
         )
-        var randomX = Random.nextInt(fieldRange.first, fieldRange.second)
-        var randomY = Random.nextInt(fieldRange.first, fieldRange.second)
+        var emptyTile: Tile
+        var randomX: Int = -1
+        var randomY: Int = -1
+
+        fun checkIsInStayingPosition(): Boolean {
+            return randomY == stayPositionY && randomX == stayPositionX
+        }
+
+        do {
+            randomX = Random.nextInt(fieldRange.first, fieldRange.second)
+            randomY = Random.nextInt(fieldRange.first, fieldRange.second)
+            emptyTile = listOfTiles.value[randomY][randomX]
+        } while (!emptyTile.isEmpty() || checkIsInStayingPosition())
 
         listOfTiles.value[randomY][randomX].changeType(Tile.Type.WithPuppy)
 
         // TODO: refactor repeating code
         for (i in 0..6) {
-            var emptyTile: Tile
             do {
                 randomX = Random.nextInt(fieldRange.first, fieldRange.second)
                 randomY = Random.nextInt(fieldRange.first, fieldRange.second)
                 emptyTile = listOfTiles.value[randomY][randomX]
-            } while (!emptyTile.isEmpty())
+            } while (!emptyTile.isEmpty() || checkIsInStayingPosition())
             getTileAt(randomY, randomX).changeType(getRandomEnemy())
         }
 
-        var emptyTile: Tile
         do {
+
+            if (stayInPosition != null) {
+                randomX = stayPositionX
+                randomY = stayPositionY
+                break
+            }
+
             randomX = Random.nextInt(fieldRange.first, fieldRange.second)
             randomY = Random.nextInt(fieldRange.first, fieldRange.second)
             emptyTile = listOfTiles.value[randomY][randomX]
-        } while (!emptyTile.isEmpty())
+        } while (!emptyTile.isEmpty() || checkIsInStayingPosition())
 
         selectedTile.value.bindPosition(randomY, randomX)
-        listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
+        if (showSelectedTile)
+            listOfTiles.value[randomY][randomX].changeState(Tile.State.Shown)
 
-        onGenerated()
     }
 
     private fun getRandomDecorationType(): Tile.Type {

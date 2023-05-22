@@ -44,7 +44,7 @@ class Tile(type: Type = Type.Neutral) : java.io.Serializable {
         const val DECORATION_NUMBER = 6
     }
 
-    enum class Type {
+     enum class Type {
         Neutral, WithPuppy,
         WithEnemyMan, WithEnemyWoman,
         Decoration, Dirt, LonelyTree, Bush1, Bush2, Bush3, Bush4, TribeOfTrees,

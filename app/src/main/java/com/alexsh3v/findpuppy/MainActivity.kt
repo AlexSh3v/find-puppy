@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.alexsh3v.findpuppy.game.App
+import com.alexsh3v.findpuppy.game.Game
 import com.alexsh3v.findpuppy.game.StatusBar
 import com.alexsh3v.findpuppy.ui.theme.FindPuppyTheme
 
@@ -27,7 +27,10 @@ class MainActivity : ComponentActivity() {
                     color = Color(0xFF0A4C09)
                 ) {
                 }
-                App(game, vibrationCallback = { mode -> vibrate(mode) })
+                Game(
+                    game = game,
+                    vibrationCallback = { vibrate(it) }
+                )
             }
         }
     }
@@ -40,7 +43,10 @@ class MainActivity : ComponentActivity() {
                     250,
                     VibrationEffect.DEFAULT_AMPLITUDE
                 )
-                VibrationMode.EnemyNearby -> VibrationEffect.createOneShot(500, 100)
+                VibrationMode.EnemyNearby -> VibrationEffect.createOneShot(
+                    200,
+                    1
+                )
 
                 else -> VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
             }

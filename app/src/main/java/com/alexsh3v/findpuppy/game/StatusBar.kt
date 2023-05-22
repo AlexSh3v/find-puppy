@@ -57,7 +57,7 @@ fun StatusBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(barSize)
-            .zIndex(FindPuppyGame.UI_Z_INDEX)
+            .zIndex(FindPuppyGame.REST_SCREEN_Z_INDEX)
             .run {
                 if (isDebug) this.border(1.dp, Color.Black)
                 else this
