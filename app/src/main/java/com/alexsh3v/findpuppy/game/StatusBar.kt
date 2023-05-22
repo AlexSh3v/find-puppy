@@ -95,36 +95,35 @@ fun StatusBar(
         ) {
 
             // STEPS
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = metricsModifier
-//                    .weight(1f), // TODO: uncomment
-            ) {
-
-                Text(
-                    text = stepsCounter().toString(),
-                    color = PuppyMain,
-                    fontSize = fontSize,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.weight(3f),
-                )
-
-                Spacer(modifier = Modifier.width(5.dp))
-
-                Image(
-                    painter = painterResource(id = R.raw.ico_footsteps),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .weight(1f)
-                        .size(iconSize),
-                    contentScale = ContentScale.Fit
-                )
-
-            }
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.SpaceEvenly,
+//                modifier = metricsModifier
+////                    .weight(1f), // TODO: uncomment
+//            ) {
+//
+//                Text(
+//                    text = stepsCounter().toString(),
+//                    color = PuppyMain,
+//                    fontSize = fontSize,
+//                    textAlign = TextAlign.Right,
+//                    modifier = Modifier.weight(3f),
+//                )
+//
+//                Spacer(modifier = Modifier.width(5.dp))
+//
+//                Image(
+//                    painter = painterResource(id = R.raw.ico_footsteps),
+//                    contentDescription = "",
+//                    modifier = Modifier
+//                        .weight(1f)
+//                        .size(iconSize),
+//                    contentScale = ContentScale.Fit
+//                )
+//
+//            }
 
 //            // TIMER:
-//            // TODO: add functional timer
 //            Row(
 //                verticalAlignment = Alignment.CenterVertically,
 //                horizontalArrangement = Arrangement.SpaceEvenly,
