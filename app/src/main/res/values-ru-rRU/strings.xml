@@ -6,7 +6,7 @@
     <string name="tutorial_phrase_2">Вы можете ходить вверх, вправо, влево и вниз</string>
     <string name="tutorial_phrase_3">По звукам и вибрации можно определить, что рядом есть противники.</string>
     <string name="tutorial_phrase_4">Звуки будут указывать на количество врагов во всех восьми клетках вокруг вас.</string>
-    <string name="tutorial_phrase_5">Вибрация же будет указывать на то, что враги находятся там, куда можно пойти.</string>
+    <string name="tutorial_phrase_5">Вибрация будет указывать на то, что враги находятся рядом.</string>
     <string name="tutorial_phrase_6">Нажмите на кнопку с вопросом, чтобы покинуть туториал.</string>
 
 </resources>

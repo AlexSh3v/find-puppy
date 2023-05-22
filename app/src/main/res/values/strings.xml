@@ -6,7 +6,7 @@
     <string name="tutorial_phrase_2">You can walk up, right, left and down</string>
     <string name="tutorial_phrase_3">By sounds and vibrations, you can determine that there are opponents nearby.</string>
     <string name="tutorial_phrase_4">The sounds will indicate the number of enemies in all eight cells around you.</string>
-    <string name="tutorial_phrase_5">The vibration will indicate that the enemy is where you can go.</string>
+    <string name="tutorial_phrase_5">The vibration will indicate that the enemy is around you.</string>
     <string name="tutorial_phrase_6">Press Question mark to exit tutorial</string>
 
     <string-array name="help_instructions">
