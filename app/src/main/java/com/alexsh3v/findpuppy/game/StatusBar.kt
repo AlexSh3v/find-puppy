@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -28,20 +26,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
-import com.alexsh3v.findpuppy.ui.theme.PuppyMain
 
 
 @SuppressLint("ResourceType")
 @Composable
 fun StatusBar(
+    isTutorial: Boolean,
+    instructionIndex: Int,
     stepsCounter: () -> Int,
     timePassedInSeconds: () -> Int,
     onPauseButtonClick: () -> Unit,
+    onQuestionMarkPressed: () -> Unit,
+    onInstructionIndexChanged: (Int) -> Unit,
+    onExitTutorial: () -> Unit,
     pauseButtonSize: Dp = 65.dp,
     metricsWidth: Dp = 100.dp,
     fontSize: TextUnit = 28.sp,
     iconSize: Dp = 40.dp,
-    isDebug: Boolean = false
+    isDebug: Boolean = false,
 ) {
     val barSize by remember {
         mutableStateOf(150.dp)
@@ -53,48 +55,60 @@ fun StatusBar(
             else this
         }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(barSize)
-            .zIndex(FindPuppyGame.REST_SCREEN_Z_INDEX)
-            .run {
-                if (isDebug) this.border(1.dp, Color.Black)
-                else this
-            },
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
 
-        // Pause Button
-        Image(
-            painter = painterResource(id = R.raw.ico_pause),
-            contentDescription = "",
+    if (!isTutorial) {
+        Row(
             modifier = Modifier
-                .padding(10.dp)
-                .clip(CircleShape.copy(CornerSize(99.dp)))
-                .size(pauseButtonSize)
-                .clickable { onPauseButtonClick() },
-            contentScale = ContentScale.Fit,
-        )
-
-        // Interface: Step Number & Timer
-        Column(
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(
-                    vertical = 10.dp,
-                    horizontal = 20.dp
-                )
-                .background(
-                    color = Color(0x77000000),
-                    shape = RoundedCornerShape(10.dp)
-                )
-                .fillMaxHeight(.5f)
-//                .fillMaxHeight() // TODO: probably uncomment in the future
+                .fillMaxWidth()
+                .height(barSize)
+                .zIndex(FindPuppyGame.REST_SCREEN_Z_INDEX)
+                .run {
+                    if (isDebug) this.border(1.dp, Color.Black)
+                    else this
+                },
         ) {
 
-            // STEPS
+            // Pause Button
+            Image(
+                painter = painterResource(id = R.raw.ico_pause),
+                contentDescription = "",
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clip(CircleShape.copy(CornerSize(99.dp)))
+                    .size(pauseButtonSize)
+                    .clickable { onPauseButtonClick() },
+                contentScale = ContentScale.Fit,
+            )
+
+            Image(
+                painter = painterResource(id = R.raw.question_button),
+                contentDescription = "",
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clip(CircleShape.copy(CornerSize(99.dp)))
+                    .size(pauseButtonSize)
+                    .clickable { onQuestionMarkPressed() },
+                contentScale = ContentScale.Fit,
+            )
+
+            // Interface: Step Number & Timer
+            Column(
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(
+                        vertical = 10.dp,
+                        horizontal = 20.dp
+                    )
+                    .background(
+                        color = Color(0x77000000),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .fillMaxHeight(.5f)
+//                .fillMaxHeight() // TODO: probably uncomment in the future
+            ) {
+
+                // STEPS
 //            Row(
 //                verticalAlignment = Alignment.CenterVertically,
 //                horizontalArrangement = Arrangement.SpaceEvenly,
@@ -151,6 +165,16 @@ fun StatusBar(
 //                )
 //            }
 
+            }
         }
+    } else {
+        HowToPlayScreen(
+            instructionIndex = instructionIndex,
+            onInstructionIndexChanged = onInstructionIndexChanged,
+            onExitTutorial = onExitTutorial
+        )
     }
+
+
+
 }

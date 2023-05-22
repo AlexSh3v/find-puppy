@@ -57,15 +57,4 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    FindPuppyTheme {
-        var stepsCounter by remember {
-            mutableStateOf(0)
-        }
-        StatusBar(
-            stepsCounter = { stepsCounter },
-            timePassedInSeconds = { 0 },
-            onPauseButtonClick = { stepsCounter++ },
-            isDebug = true
-        )
-    }
 }

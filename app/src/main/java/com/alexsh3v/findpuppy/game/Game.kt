@@ -169,6 +169,7 @@ fun Game(
         )
 
     var isResting by remember { mutableStateOf(true) }
+    var isTutorial by remember { mutableStateOf(false) }
 
     if (isResting)
         RestScreen(
@@ -199,14 +200,31 @@ fun Game(
             }
         )
 
+    var instructionIndex by remember {
+        mutableStateOf(0)
+    }
+
     if (!isResting)
         StatusBar(
+            isTutorial = isTutorial,
+            instructionIndex = instructionIndex ,
             stepsCounter = { stepsCounter },
             timePassedInSeconds = { 0 },
             onPauseButtonClick = {
                 audioManager.playUiSound()
                 isPaused = true
                 isResting = true
+            },
+            onQuestionMarkPressed = {
+                instructionIndex = 0
+                isResting = false
+                isTutorial = true
+            },
+            onInstructionIndexChanged = {
+                instructionIndex = it
+            },
+            onExitTutorial = {
+                isTutorial = false
             }
         )
 
