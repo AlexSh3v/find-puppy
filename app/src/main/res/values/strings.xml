@@ -8,6 +8,8 @@
     <string name="tutorial_phrase_4">The sounds will indicate the number of enemies in all eight cells around you.</string>
     <string name="tutorial_phrase_5">The vibration will indicate that the enemy is around you.</string>
     <string name="tutorial_phrase_6">Press Question mark to exit tutorial</string>
+    <string name="game_over_puppy_found">Puppy Found!</string>
+    <string name="game_over_enemy_found">Busted!</string>
 
     <string-array name="help_instructions">
         <item>@string/tutorial_phrase_1</item>

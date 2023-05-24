@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.alexsh3v.findpuppy.FindPuppyGame
 import com.alexsh3v.findpuppy.R
+import com.alexsh3v.findpuppy.ui.theme.PuppyMain
 
 
 @SuppressLint("ResourceType")
@@ -34,7 +37,7 @@ fun StatusBar(
     isTutorial: Boolean,
     instructionIndex: Int,
     stepsCounter: () -> Int,
-    timePassedInSeconds: () -> Int,
+    timePassedInSeconds: Int,
     onPauseButtonClick: () -> Unit,
     onQuestionMarkPressed: () -> Unit,
     onInstructionIndexChanged: (Int) -> Unit,
@@ -58,6 +61,7 @@ fun StatusBar(
 
     if (!isTutorial) {
         Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barSize)
@@ -68,28 +72,31 @@ fun StatusBar(
                 },
         ) {
 
-            // Pause Button
-            Image(
-                painter = painterResource(id = R.raw.ico_pause),
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clip(CircleShape.copy(CornerSize(99.dp)))
-                    .size(pauseButtonSize)
-                    .clickable { onPauseButtonClick() },
-                contentScale = ContentScale.Fit,
-            )
+            Row {
 
-            Image(
-                painter = painterResource(id = R.raw.question_button),
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clip(CircleShape.copy(CornerSize(99.dp)))
-                    .size(pauseButtonSize)
-                    .clickable { onQuestionMarkPressed() },
-                contentScale = ContentScale.Fit,
-            )
+                // Pause Button
+                Image(
+                    painter = painterResource(id = R.raw.ico_pause),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .clip(CircleShape.copy(CornerSize(99.dp)))
+                        .size(pauseButtonSize)
+                        .clickable { onPauseButtonClick() },
+                    contentScale = ContentScale.Fit,
+                )
+
+                Image(
+                    painter = painterResource(id = R.raw.question_button),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .clip(CircleShape.copy(CornerSize(99.dp)))
+                        .size(pauseButtonSize)
+                        .clickable { onQuestionMarkPressed() },
+                    contentScale = ContentScale.Fit,
+                )
+            }
 
             // Interface: Step Number & Timer
             Column(
@@ -138,32 +145,30 @@ fun StatusBar(
 //            }
 
 //            // TIMER:
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.SpaceEvenly,
-//                modifier = metricsModifier
-//                    .weight(1f),
-//            ) {
-//
-//                Text(
-//                    text = timePassedInSeconds().toString(),
-//                    color = PuppyMain,
-//                    fontSize = fontSize,
-//                    textAlign = TextAlign.Right,
-//                    modifier = Modifier.weight(3f)
-//                )
-//
-//                Spacer(modifier = Modifier.width(5.dp))
-//
-//                Image(
-//                    painter = painterResource(id = R.raw.ico_timer),
-//                    contentDescription = "",
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .size(iconSize),
-//                    contentScale = ContentScale.Fit
-//                )
-//            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+
+                Text(
+                    text = Timer.prettify(timePassedInSeconds),
+                    color = PuppyMain,
+                    fontSize = fontSize,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.weight(3f)
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Image(
+                    painter = painterResource(id = R.raw.ico_timer),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .weight(1f)
+                        .size(iconSize),
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             }
         }

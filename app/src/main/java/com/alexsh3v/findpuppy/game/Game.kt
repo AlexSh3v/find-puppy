@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -55,6 +56,12 @@ fun Game(
         )
     }
 
+    val timerScope = rememberCoroutineScope()
+    val timer by remember {
+        mutableStateOf(Timer(timerScope))
+    }
+    val timerValue = timer.valueSeconds.collectAsState(initial = 0).value
+
     val triggerScreamAndVibrationForNearestEnemies: () -> Unit = {
         var isVibrated = false
         for (enemyTile in game.getNearestEnemies()) {
@@ -76,6 +83,7 @@ fun Game(
     val generateFieldWithChecksAndVibro: (() -> Unit) -> Unit = {
         it()
         triggerScreamAndVibrationForNearestEnemies()
+        timer.start()
     }
 
     val tileSize by remember {
@@ -96,6 +104,9 @@ fun Game(
 
     val scope = rememberCoroutineScope()
     var isGameSuspendedNecessarily by remember {
+        mutableStateOf(false)
+    }
+    var isGameOver by remember {
         mutableStateOf(false)
     }
     var isPuppyFound by remember {
@@ -175,6 +186,7 @@ fun Game(
         RestScreen(
             screenType = if (isGameJustStarted) RestScreenType.Login else RestScreenType.Pause,
             onPlayButtonCallback = {
+                timer.start()
                 audioManager.playUiSound()
                 if (isGameJustStarted) {
                     game.getTileAt(selectedTileVector.first, selectedTileVector.second)
@@ -188,6 +200,7 @@ fun Game(
                 audioManager.playUiSound()
             },
             onRestartButtonCallback = {
+                timer.reset()
                 audioManager.playUiSound()
                 generateFieldWithChecksAndVibro {
                     game.generateNewField(
@@ -200,32 +213,61 @@ fun Game(
             }
         )
 
+    if (isGameOver)
+        FinalScreen(
+            title = if (isPuppyFound) stringResource(R.string.game_over_puppy_found)
+                else stringResource(R.string.game_over_enemy_found),
+            titleColor = if (isPuppyFound) Color.Green else Color.Red,
+            stepsCounter = stepsCounter,
+            timerValue = timerValue,
+            onRestartCallback = {
+                timer.reset()
+                isGameOver = false
+                isPuppyFound = false
+                isEnemyFound = false
+                generateFieldWithChecksAndVibro {
+                    game.generateNewField(
+                        showSelectedTile = true,
+                        stayInPosition = selectedTile.getPositionPair()
+                    )
+                }
+                stepsCounter = 0
+            },
+            onEnter = {
+
+            }
+        )
+
     var instructionIndex by remember {
         mutableStateOf(0)
     }
 
-    if (!isResting)
+    if (!isResting && !isGameOver)
         StatusBar(
             isTutorial = isTutorial,
             instructionIndex = instructionIndex ,
             stepsCounter = { stepsCounter },
-            timePassedInSeconds = { 0 },
+            timePassedInSeconds = timerValue,
             onPauseButtonClick = {
+                timer.pause()
                 audioManager.playUiSound()
                 isPaused = true
                 isResting = true
             },
             onQuestionMarkPressed = {
+                audioManager.playUiSound()
                 instructionIndex = 0
                 isResting = false
                 isTutorial = true
             },
             onInstructionIndexChanged = {
+                audioManager.playUiSound()
                 instructionIndex = it
             },
             onExitTutorial = {
+                audioManager.playUiSound()
                 isTutorial = false
-            }
+            },
         )
 
     val triggerPuppy: () -> Unit = {
@@ -234,18 +276,12 @@ fun Game(
             vibrationCallback(VibrationMode.PuppySpotted)
             isGameSuspendedNecessarily = true
             isPuppyFound = true
+            timer.pause()
 
             delay(4000)
 
             isGameSuspendedNecessarily = false
-            isPuppyFound = false
-            generateFieldWithChecksAndVibro {
-                game.generateNewField(
-                    showSelectedTile = true,
-                    stayInPosition = selectedTile.getPositionPair()
-                )
-            }
-            stepsCounter = 0
+            isGameOver = true
         }
     }
     val triggerEnemy: () -> Unit = {
@@ -253,17 +289,12 @@ fun Game(
         scope.launch {
             isGameSuspendedNecessarily = true
             isEnemyFound = true
+            timer.pause()
 
             delay(4000)
 
+            isGameOver = true
             isGameSuspendedNecessarily = false
-            isEnemyFound = false
-
-            game.generateNewField(
-                showSelectedTile = true,
-                stayInPosition = selectedTile.getPositionPair()
-            )
-            stepsCounter = 0
         }
     }
 
