@@ -44,7 +44,7 @@ FindPuppy is a 2D Android game built using Kotlin and Jetpack Compose. The game 
 
 ---
 
-### The Samsung IT School
+### The Samsung IT School  🎓
 
 I'm excited to share that I've completed the **Samsung IT School** program, graduating on <u>*June 2023*</u>! 
 
