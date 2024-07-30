@@ -6,23 +6,7 @@
   <img src="images/screenshot_3.png" alt="Image 3" width="25%" margin-left="10px">
 </div>
 
-
-
-🕷️ Imagine being stranded in a desolate field, where the wind whispers secrets in your ear and the shadows writhe like living things...
-
-The voices are closing in, their whispers growing louder, and you're not sure what's lurking just out of sight...
-
-BUT THEN, you hear it - a faint, mournful whimpering in the distance, like the cry of a lost soul...
-
-Your heart skips a beat as you realize you're not alone...
-
-There's a puppy out there... and it's calling to you...
-
-**Find Puppy** 🐶 is a haunting Android game that will test your courage and challenge your perceptions. So, take a deep breath, steel yourself, and venture into the unknown. 
-
-The puppy is waiting... but for how long?
-
----
+Demo video here --> [google drive](https://drive.google.com/file/d/1zpOAgFPePl6guoqB2ymwqWpimAamULjl/view?usp=sharing).
 
 ### Find Puppy 🐶
 
